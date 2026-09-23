@@ -182,43 +182,15 @@ INSERT INTO user_logins (login_id, user_id, login_time) VALUES
 -- |     102 | 2024-01-01 | 08:00:00     |
 -- |     103 | 2024-01-03 | 11:00:00     |
 -- +---------+------------+--------------+
+--Solution:
+SELECT user_id,DATE(login_time) AS login_date,TIME(login_time) AS login_timing
+FROM(SELECT *,ROW_NUMBER() OVER(PARTITION BY user_id,DATE(login_time) ORDER BY TIME(login_time)) AS ranking
+FROM user_logins)AS ranked
+WHERE ranking = 1;
 
 
 -- =========================================
--- Problem 6: Most Recent Ticket Status (Deterministic Tiebreaker)
--- =========================================
--- Task: For each ticket_id, return the current (most recent) status.
--- Ticket 5002 has an exact timestamp tie (log_id 5 and 6) -> use log_id as
--- an explicit tiebreaker in ORDER BY for determinism.
-
-CREATE TABLE ticket_status_log (
-    log_id      INT,
-    ticket_id   INT,
-    status      VARCHAR(20),
-    updated_at  DATETIME
-);
-
-INSERT INTO ticket_status_log (log_id, ticket_id, status, updated_at) VALUES
-(1, 5001, 'OPEN',        '2024-03-01 09:00:00'),
-(2, 5001, 'IN_PROGRESS', '2024-03-02 10:00:00'),
-(3, 5001, 'CLOSED',      '2024-03-03 14:00:00'),
-(4, 5002, 'OPEN',        '2024-03-01 08:00:00'),
-(5, 5002, 'IN_PROGRESS', '2024-03-05 12:00:00'),
-(6, 5002, 'IN_PROGRESS', '2024-03-05 12:00:00'),
-(7, 5003, 'OPEN',        '2024-03-04 07:00:00');
-
--- Expected output (3 rows):
--- +-----------+-------------+---------------------+
--- | ticket_id | status      | updated_at          |
--- +-----------+-------------+---------------------+
--- |      5001 | CLOSED      | 2024-03-03 14:00:00 |
--- |      5002 | IN_PROGRESS | 2024-03-05 12:00:00 |
--- |      5003 | OPEN        | 2024-03-04 07:00:00 |
--- +-----------+-------------+---------------------+
-
-
--- =========================================
--- Problem 7: Peak Months (LAG + LEAD combined)
+-- Problem 6: Peak Months (LAG + LEAD combined)
 -- =========================================
 -- Task: Find every "peak month" per product - revenue strictly HIGHER than
 -- BOTH the previous month AND the next month.
@@ -252,3 +224,8 @@ INSERT INTO monthly_sales (product, sale_month, revenue) VALUES
 -- | Widget A | 2024-04-01 |    1500 |
 -- | Widget B | 2024-02-01 |     700 |
 -- +----------+------------+---------+
+
+--Solution:
+SELECT product,sale_month,revenue
+FROM(SELECT *,LAG(revenue) OVER(PARTITION BY product ORDER BY sale_month)AS prev_month,LEAD(revenue) OVER(PARTITION BY product ORDER BY sale_month)AS next_month FROM  monthly_sales)AS profit
+WHERE revenue >= prev_month AND revenue >= next_month;

@@ -74,8 +74,16 @@ INSERT INTO employees (emp_id, emp_name, department, salary) VALUES
 -- ROW_NUMBER()  -> 6 rows total  (exactly 2 per department, always)
 -- RANK()        -> 7 rows total  (Marketing gets 3 - all tied at rank 1)
 -- DENSE_RANK()  -> 9 rows total  (Marketing gets 3, Sales gets 3, Engineering gets 3)
-
-
+--Solution:
+-- ROW_NUMBER()
+SELECT emp_name,salary,ranking FROM(SELECT *,ROW_NUMBER() OVER(PARTITION BY department ORDER BY salary DESC) AS ranking FROM employees)AS ranked
+WHERE ranking <=2;
+-- RANK() 
+SELECT emp_name,salary,ranking FROM(SELECT *,RANK() OVER(PARTITION BY department ORDER BY salary DESC) AS ranking FROM employees)AS ranked
+WHERE ranking <=2;
+-- DENSE_RANK()
+SELECT emp_name,salary,ranking FROM(SELECT *,DENSE_RANK() OVER(PARTITION BY department ORDER BY salary DESC) AS ranking FROM employees)AS ranked
+WHERE ranking <=2;
 -- =========================================
 -- Problem 3: Month-over-Month Change (LAG)
 -- =========================================
@@ -111,7 +119,9 @@ INSERT INTO monthly_sales (product, sale_month, revenue) VALUES
 -- | Widget B | 2024-03-01 |     650 |          700 |            -50 |
 -- | Widget B | 2024-04-01 |     800 |          650 |            150 |
 -- +----------+------------+---------+--------------+----------------+
-
+--Solution:
+SELECT *,revenue - prev_revenue AS revenue_change
+FROM(SELECT *,LAG(revenue) OVER(PARTITION BY product ORDER BY sale_month) AS prev_revenue FROM monthly_sales)AS prev;
 
 -- =========================================
 -- Problem 4: Next Month Price Drop Detection (LEAD)
@@ -135,6 +145,13 @@ INSERT INTO monthly_sales (product, sale_month, revenue) VALUES
 -- | Widget B | 2024-04-01 |     800 |         NULL | NULL      |
 -- +----------+------------+---------+--------------+-----------+
 
+--Solution:
+SELECT *,
+CASE WHEN next_revenue >= revenue THEN 'NO'
+WHEN next_revenue IS NULL THEN NULL
+ELSE 'Yes'
+END AS will_drop
+FROM(SELECT *,LEAD(revenue) OVER(PARTITION BY product ORDER BY sale_month) AS next_revenue FROM monthly_sales)AS next;
 
 -- =========================================
 -- Problem 5: De-duplicate Logins (First Login Per User Per Day)

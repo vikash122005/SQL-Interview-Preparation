@@ -128,6 +128,16 @@ GROUP BY c.customer_id,c.customer_name;
 -- +---------------+-------------+
 -- (Ravi's only order was CANCELLED, Karan has no orders)
 
+--Solutions:
+SELECT t1.customer_name,SUM(t3.quantity * t4.price) AS total_spent
+FROM customers t1
+INNER JOIN orders t2 on t1.customer_id = t2.customer_id
+INNER JOIN order_items t3 on t2.order_id = t3.order_id
+INNER JOIN products t4 on t3.product_id = t4.product_id
+WHERE t2.status = 'DELIVERED'
+GROUP BY t1.customer_id,t1.customer_name
+ORDER BY total_spent DESC;
+
 
 -- =========================================
 -- Problem 4: Total Spend per Customer, Keeping Everyone
@@ -149,6 +159,15 @@ GROUP BY c.customer_id,c.customer_name;
 -- | Ravi          |           0 |
 -- +---------------+-------------+
 
+--Solutions:
+SELECT t1.customer_name,COALESCE(SUM(t3.quantity * t4.price),0) AS total_spent
+FROM customers t1
+LEFT JOIN orders t2 on t1.customer_id = t2.customer_id AND t2.status = 'DELIVERED'
+LEFT JOIN order_items t3 on t2.order_id = t3.order_id
+LEFT JOIN products t4 on t3.product_id = t4.product_id
+GROUP BY t1.customer_id,t1.customer_name
+ORDER BY total_spent DESC , t1.customer_name;
+
 
 -- =========================================
 -- Problem 5: Products That Were Never Ordered
@@ -162,3 +181,9 @@ GROUP BY c.customer_id,c.customer_name;
 -- +------------+--------------+
 -- |          4 | Monitor      |
 -- +------------+--------------+
+
+--Solutions:
+SELECT t1.product_id,t1.product_name
+FROM products t1
+LEFT JOIN order_items t2 on t1.product_id = t2.product_id
+WHERE t2.item_id IS NULL;

@@ -7,7 +7,7 @@ A 14-day hands-on SQL practice log for Data Engineer interviews. Each day has a 
 | Day | Topic | File | Status |
 |-----|-------|------|--------|
 | 1 | Window functions: `RANK`, `DENSE_RANK`, `ROW_NUMBER`, `LAG`, `LEAD` | `day01_window_functions.sql` | Done |
-| 2 | Advanced window functions: `NTILE`, `FIRST_VALUE`/`LAST_VALUE`, running totals, frames | `day02_window_functions_advanced.sql` | In progress |
+| 2 | Advanced window functions: `NTILE`, `FIRST_VALUE`/`LAST_VALUE`, running totals, frames | `day02_window_functions_advanced.sql` | Done |
 | 3 | Aggregations: `GROUP BY`, `HAVING` | `day03_group_by_having.sql` | Done |
 | 4 | Multi-table JOINs, anti-joins, counting including zero | `day04_multi_table_joins.sql`, `day04_extra_practice.sql` | Done |
 | 5 | Self-joins | | Upcoming |

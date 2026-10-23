@@ -141,6 +141,16 @@ ORDER BY d.dept_id;
 -- Task B (the naive NOT IN) will return an EMPTY result. Explain why,
 -- then fix it so NOT IN works.
 
+--Solutions(Task A):
+SELECT d.dept_id,d.dept_name
+FROM departments d
+WHERE NOT EXISTS(SELECT 1 FROM employees e WHERE d.dept_id = e.dept_id);
+
+--Solutions(Task B):(NOT IN will take NULL into account and will return empty result, so we need to filter out NULLs in the subquery)
+SELECT dept_id,dept_name
+FROM departments
+WHERE dept_id NOT IN(SELECT dept_id FROM employees WHERE dept_id IS NOT NULL);
+
 --Solutions(Just tried with ANTI JOINS):
 SELECT d.dept_id,d.dept_name
 FROM departments d
@@ -165,6 +175,12 @@ WHERE e.emp_id IS NULL;
 -- | Divya    |      30 |  50000 |
 -- | Neha     |      10 |  95000 |
 -- +----------+---------+--------+
+
+--Solutions:
+SELECT e1.emp_name,e1.dept_id,e1.salary
+FROM employees e1
+WHERE salary = (SELECT MAX(salary) FROM employees e2 WHERE e1.dept_id = e2.dept_id)
+ORDER BY e1.emp_id;
 
 --Solutions(Just tried with DENSE_RANK() function):
 SELECT emp_name,dept_id,salary

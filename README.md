@@ -7,12 +7,12 @@ A 14-day hands-on SQL practice log for Data Engineer interviews. Each day has a 
 | Day | Topic | File | Status |
 |-----|-------|------|--------|
 | 1 | Window functions: `RANK`, `DENSE_RANK`, `ROW_NUMBER`, `LAG`, `LEAD` | `day01_window_functions.sql` | Done |
-| 2 | Advanced window functions: `NTILE`, `FIRST_VALUE`/`LAST_VALUE`, running totals, frames | `day02_window_functions_advanced.sql` | Done |
+| 2 | Advanced window functions: `NTILE`, `FIRST_VALUE`/`LAST_VALUE`, running totals, frames | `day02_window_functions_advanced.sql` | In progress |
 | 3 | Aggregations: `GROUP BY`, `HAVING` | `day03_group_by_having.sql` | Done |
 | 4 | Multi-table JOINs, anti-joins, counting including zero | `day04_multi_table_joins.sql`, `day04_extra_practice.sql` | Done |
-| 5 | Self-joins | | Upcoming |
-| 6 | Subqueries: correlated, `EXISTS` vs `IN` | | Upcoming |
-| 7 | Set operations and review | | Upcoming |
+| 5 | Self-joins | `day05_self_joins.sql` | Done |
+| 6 | Subqueries: correlated vs non-correlated, `EXISTS` vs `IN` | `day06_subqueries.sql` | Done |
+| 7 | Set operations: `UNION`, `INTERSECT`, `EXCEPT` + review | `day07_set_operations.sql` | Done |
 | 8 | String and date functions | | Upcoming |
 | 9 | CTEs and recursive CTEs | | Upcoming |
 | 10 | Running totals and moving averages | | Upcoming |
@@ -47,6 +47,41 @@ A 14-day hands-on SQL practice log for Data Engineer interviews. Each day has a 
 - `COALESCE(SUM(...), 0)` turns a NULL total into 0.
 - Multiply inside the aggregate: `SUM(quantity * price)`, not `SUM(quantity) * price`.
 
+### Day 5: Self-joins
+- A self-join is a normal join where both sides are the same table, told apart with two aliases (for example `e` for employee, `m` for manager).
+- Employee-to-manager: `LEFT JOIN employees m ON e.manager_id = m.emp_id`. `LEFT` keeps the top of the hierarchy (no manager).
+- Compare two rows of the same table, such as "earns more than their manager".
+- Direct reports: group by the manager's unique `emp_id`, and count from the report side.
+- No direct reports: anti-join with the table joined to itself.
+- Pairs that share a value: join on the shared column and add `a.emp_id < b.emp_id`. This removes self-pairs and mirrored duplicates in one condition.
+- `NULL = NULL` is never true, so rows with a NULL key never match each other.
+
+### Day 6: Subqueries
+- A non-correlated subquery runs once. A correlated subquery depends on the outer row and is evaluated per row.
+- A scalar subquery used with `>` or `=` must return exactly one value.
+- `IN` handles NULLs safely. `NOT IN` returns nothing if the list contains a NULL.
+- Safe alternatives for "no match": `NOT EXISTS`, `LEFT JOIN ... IS NULL`, or `NOT IN` with `WHERE col IS NOT NULL`.
+- `EXISTS` has no column on its left. The link between tables lives inside the subquery.
+- "Top 1 per group" can be a window function or a correlated `MAX`. For top N, use the window function.
+- Qualify column names inside correlated subqueries (`e1.salary`, `e2.salary`).
+
+### Day 7: Set operations
+- `UNION` stacks rows and removes duplicate rows. `UNION ALL` keeps everything and is faster.
+- Each `SELECT` needs the same number of columns, matched by position. Column names come from the first `SELECT`.
+- `ORDER BY` goes once, at the very end.
+- `INTERSECT` returns rows in both results. `EXCEPT` returns rows in the first but not the second, and the order of the two queries matters.
+- Wrap each part in parentheses when combining several set operations.
+- Use `UNION ALL` when adding up values from two sources. `UNION` silently drops legitimate repeated values and gives the wrong total.
+- `LEFT JOIN ... UNION ... RIGHT JOIN` emulates a `FULL OUTER JOIN` in MySQL.
+- Add a literal label column (`'online' AS channel`) to tell the sources apart after stacking.
+
+## Common mistakes I'm working on
+1. Putting an outer-join filter in `WHERE` when it belongs in `ON`.
+2. Using `COUNT(*)` after a `LEFT JOIN` when I need `COUNT(right_pk)`.
+3. Forgetting `ORDER BY`, aliases on calculated columns, or a tiebreaker.
+4. Using `>=` when the problem says strictly higher.
+5. Trusting an expected output without checking it against the raw data.
+
 ## How to run
 
 ```bash
@@ -60,5 +95,5 @@ SOURCE /full/path/to/day01_window_functions.sql;
 ```
 
 ## Tools
-- MySQL 8
+- MySQL 8.0.31+ (needed for `INTERSECT` and `EXCEPT`)
 - Git and GitHub

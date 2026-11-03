@@ -184,6 +184,12 @@ ORDER BY DATE_FORMAT(signup_date, '%Y-%m');
 -- |        2 | 2024-05-02 | 2024-05-07    |          5 |
 -- |        4 | 2024-05-15 | 2024-05-22    |          7 |
 -- +----------+------------+---------------+------------+
+
+--Solutions for Task A:
+SELECT order_id,order_date,delivery_date,DATEDIFF(delivery_date,order_date) AS days_taken
+FROM deliveries
+WHERE DATEDIFF(delivery_date,order_date) >3
+ORDER BY order_id;
 --
 -- Expected output for Task B:
 -- +----------+-----------------+
@@ -195,3 +201,14 @@ ORDER BY DATE_FORMAT(signup_date, '%Y-%m');
 -- |        4 | LATE            |
 -- |        5 | PENDING         |
 -- +----------+-----------------+
+
+--Solutions for Task B:
+
+SELECT order_id,
+CASE
+WHEN DATEDIFF(delivery_date,order_date) <= 3 THEN 'ON TIME'
+WHEN DATEDIFF(delivery_date,order_date) > 3 THEN 'LATE'
+ELSE 'PENDING'
+END AS delivery_status
+FROM deliveries
+ORDER BY order_id;
